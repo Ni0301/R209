@@ -45,9 +45,16 @@ class Note
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'notes')]
     private Collection $tag;
 
+    /**
+     * @var Collection<int, VieNote>
+     */
+    #[ORM\OneToMany(targetEntity: VieNote::class, mappedBy: 'note')]
+    private Collection $vieNotes;
+
     public function __construct()
     {
         $this->tag = new ArrayCollection();
+        $this->vieNotes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -159,6 +166,36 @@ class Note
     public function removeTag(Tag $tag): static
     {
         $this->tag->removeElement($tag);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, VieNote>
+     */
+    public function getVieNotes(): Collection
+    {
+        return $this->vieNotes;
+    }
+
+    public function addVieNote(VieNote $vieNote): static
+    {
+        if (!$this->vieNotes->contains($vieNote)) {
+            $this->vieNotes->add($vieNote);
+            $vieNote->setNote($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVieNote(VieNote $vieNote): static
+    {
+        if ($this->vieNotes->removeElement($vieNote)) {
+            // set the owning side to null (unless already changed)
+            if ($vieNote->getNote() === $this) {
+                $vieNote->setNote(null);
+            }
+        }
 
         return $this;
     }

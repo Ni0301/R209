@@ -50,9 +50,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'user')]
     private Collection $notes;
 
+    /**
+     * @var Collection<int, VieNote>
+     */
+    #[ORM\OneToMany(targetEntity: VieNote::class, mappedBy: 'createur')]
+    private Collection $vieNotes;
+
     public function __construct()
     {
         $this->notes = new ArrayCollection();
+        $this->vieNotes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -188,6 +195,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($note->getUser() === $this) {
                 $note->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, VieNote>
+     */
+    public function getVieNotes(): Collection
+    {
+        return $this->vieNotes;
+    }
+
+    public function addVieNote(VieNote $vieNote): static
+    {
+        if (!$this->vieNotes->contains($vieNote)) {
+            $this->vieNotes->add($vieNote);
+            $vieNote->setCreateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVieNote(VieNote $vieNote): static
+    {
+        if ($this->vieNotes->removeElement($vieNote)) {
+            // set the owning side to null (unless already changed)
+            if ($vieNote->getCreateur() === $this) {
+                $vieNote->setCreateur(null);
             }
         }
 
