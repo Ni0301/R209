@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Exemples Criteria{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Exemples d'utilisation des Criteria</h1>
+    
+    <div class="row">
+        <!-- Statistiques générales -->
+        <div class="col-md-12 mb-4">
+            <div class="alert alert-info">
+                <h5>📊 Statistiques</h5>
+                <p><strong>Total de vos notes :</strong> {{ total_notes }}</p>
+                <p><strong>Total de vos VieNotes :</strong> {{ total_vienotes }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Notes récentes (7 derniers jours) -->
+        <div class="col-md-6">
+            <h5 class="text-primary">📅 Notes récentes (7 derniers jours)</h5>
+            <div class="card">
+                <div class="card-body">
+                    <p><strong>Trouvées :</strong> {{ notes_recentes|length }}</p>
+                    <ul class="list-group">
+                        {% for note in notes_recentes %}
+                            <li class="list-group-item">
+                                <strong>{{ note.titre }}</strong><br>
+                                <small>{{ note.description|slice(0, 50) }}...</small><br>
+                                <small class="text-muted">Créée le : {{ note.createdAt|date('d/m/Y H:i') }}</small><br>
+                                <span class="badge bg-info">{{ note.etat.nom }}</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">Aucune note récente trouvée</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes spécifiques (propriete = 1 et endAt défini) -->
+        <div class="col-md-6">
+            <h5 class="text-warning">⚙️ Notes spécifiques (propriété = 1 + date fin)</h5>
+            <div class="card">
+                <div class="card-body">
+                    <p><strong>Trouvées :</strong> {{ notes_specifiques|length }}</p>
+                    <ul class="list-group">
+                        {% for note in notes_specifiques %}
+                            <li class="list-group-item">
+                                <strong>{{ note.titre }}</strong><br>
+                                <small>Propriété : {{ note.propriete }}</small><br>
+                                <small class="text-muted">Fin prévue : {{ note.endAt|date('d/m/Y') }}</small><br>
+                                <span class="badge bg-success">{{ note.etat.nom }}</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">Aucune note spécifique trouvée</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VieNotes complexes -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h5 class="text-success">🔍 VieNotes complexes (30 derniers jours + contient "test")</h5>
+            <div class="card">
+                <div class="card-header">
+                    <p><strong>Criteria utilisé :</strong> Date >= -30 jours ET description contient "test" (max 10 résultats)</p>
+                </div>
+                <div class="card-body">
+                    <p><strong>Résultats trouvés :</strong> {{ vienotes_complexes|length }}</p>
+                    <div class="row">
+                        {% for vienote in vienotes_complexes %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-left-success">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ vienote.note.titre }}</h6>
+                                        <p class="card-text">{{ vienote.description }}</p>
+                                        <small class="text-muted">
+                                            Par : {{ vienote.createur.prenom }} {{ vienote.createur.non }}<br>
+                                            Le : {{ vienote.updatedAt|date('d/m/Y H:i:s') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-md-12">
+                                <div class="alert alert-warning">
+                                    Aucune VieNote trouvée avec ces critères.<br>
+                                    <small>Essayez de créer une VieNote avec "test" dans la description pour voir ce criteria en action !</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code exemple -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h5 class="text-info">💻 Exemple de code Criteria utilisé</h5>
+            <div class="card">
+                <div class="card-body">
+                    <pre><code>
+// Criteria pour VieNotes complexes
+$criteriaComplexe = Criteria::create()
+    ->where(Criteria::expr()->gte('updatedAt', new \DateTimeImmutable('-30 days')))
+    ->andWhere(Criteria::expr()->contains('description', 'test'))
+    ->orderBy(['updatedAt' => 'DESC'])
+    ->setFirstResult(0)
+    ->setMaxResults(10);
+
+$vieNotesComplexes = $vieNotes->matching($criteriaComplexe);
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('app_dashboard_vienote_criteria') }}" class="btn btn-primary">Retour Dashboard Criteria</a>
+        <a href="{{ path('app_dashboard_vienote') }}" class="btn btn-secondary">Dashboard VieNote</a>
+        <a href="{{ path('app_vienote_new') }}" class="btn btn-success">Créer VieNote test</a>
+    </div>
+</div>
+{% endblock %}

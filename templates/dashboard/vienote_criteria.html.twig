@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard VieNote avec Criteria{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Dashboard VieNote - Utilisation des Criteria</h1>
+    
+    <div class="row">
+        <!-- Mes VieNotes récentes avec criteria -->
+        <div class="col-md-6">
+            <h5 class="text-info">🔍 Mes VieNotes récentes (48h - Criteria)</h5>
+            <div class="card">
+                <div class="card-body">
+                    <p><strong>Total de mes VieNotes :</strong> {{ mes_vienotes|length }}</p>
+                    <p><strong>VieNotes récentes trouvées :</strong> {{ vienotes_recentes|length }}</p>
+                    <ul class="list-group">
+                        {% for vienote in vienotes_recentes %}
+                            <li class="list-group-item">
+                                <strong>{{ vienote.note.titre }}</strong><br>
+                                <small>{{ vienote.description }}</small><br>
+                                <small class="text-muted">{{ vienote.updatedAt|date('d/m/Y H:i:s') }}</small>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">Aucune VieNote récente</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VieNotes contenant "modification" -->
+        <div class="col-md-6">
+            <h5 class="text-warning">📝 VieNotes contenant "modification"</h5>
+            <div class="card">
+                <div class="card-body">
+                    <p><strong>Trouvées :</strong> {{ vienotes_modification|length }}</p>
+                    <ul class="list-group">
+                        {% for vienote in vienotes_modification %}
+                            <li class="list-group-item">
+                                <strong>{{ vienote.note.titre }}</strong><br>
+                                <small>{{ vienote.description }}</small><br>
+                                <small class="text-muted">{{ vienote.updatedAt|date('d/m/Y H:i') }}</small>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">Aucune VieNote avec "modification"</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VieNotes par Note -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h5 class="text-success">📋 VieNotes par Note (max 5 par note, triées par date)</h5>
+            {% for note_titre, vienotes in vienotes_par_note %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6>{{ note_titre }} <span class="badge bg-primary">{{ vienotes|length }} modifications</span></h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for vienote in vienotes %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <div>
+                                        <span>{{ vienote.description }}</span><br>
+                                        <small class="text-muted">Par: {{ vienote.createur.prenom }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ vienote.updatedAt|date('d/m/Y H:i') }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% else %}
+                <p class="alert alert-info">Aucune VieNote trouvée pour vos notes</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('app_exemples_criteria') }}" class="btn btn-info">Voir plus d'exemples de Criteria</a>
+        <a href="{{ path('app_dashboard_vienote') }}" class="btn btn-secondary">Retour Dashboard VieNote</a>
+    </div>
+</div>
+{% endblock %}
