@@ -17,6 +17,11 @@
                             {{ form_widget(form.description) }}
                             {{ form_errors(form.description) }}
                         </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            <a href="{{ path('app_vienote_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                        </div>
 
                         <div class="mb-3">
                             {{ form_label(form.note) }}
