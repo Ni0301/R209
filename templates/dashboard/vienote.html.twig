@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard VieNote{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Dashboard VieNote avec JavaScript</h1>
+    
+    <!-- Bouton pour action JavaScript -->
+    <div class="mb-4">
+        <button onclick="ajouterModificationRapide()" class="btn btn-primary">
+            ➕ Ajouter modification rapide
+        </button>
+        <div id="resultat_js" class="mt-3"></div>
+    </div>
+
+    <div class="row">
+        <!-- VieNote récentes -->
+        <div class="col-md-4">
+            <h5 class="text-info">🕒 Modifications récentes (24h)</h5>
+            <ul class="list-group" id="liste_recentes">
+                {% for vienote in vienotes_recentes %}
+                    <li class="list-group-item vienote-item" onmouseover="highlightItem(this)" onmouseout="resetItem(this)">
+                        <strong>{{ vienote.note.titre }}</strong><br>
+                        <small>{{ vienote.description }}</small><br>
+                        <small class="text-muted">{{ vienote.updatedAt|date('d/m/Y H:i') }}</small>
+                    </li>
+                {% else %}
+                    <li class="list-group-item">Aucune modification récente</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Mes VieNote -->
+        <div class="col-md-4">
+            <h5 class="text-success">👤 Mes modifications</h5>
+            <ul class="list-group">
+                {% for vienote in mes_vienotes %}
+                    <li class="list-group-item vienote-item" onmouseover="highlightItem(this)" onmouseout="resetItem(this)">
+                        <strong>{{ vienote.note.titre }}</strong><br>
+                        <small>{{ vienote.description }}</small><br>
+                        <small class="text-muted">{{ vienote.updatedAt|date('d/m/Y H:i') }}</small>
+                    </li>
+                {% else %}
+                    <li class="list-group-item">Aucune modification trouvée</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- VieNote En cours -->
+        <div class="col-md-4">
+            <h5 class="text-warning">⚡ Modifications notes "En cours"</h5>
+            <ul class="list-group">
+                {% for vienote in vienotes_en_cours %}
+                    <li class="list-group-item vienote-item" onmouseover="highlightItem(this)" onmouseout="resetItem(this)">
+                        <strong>{{ vienote.note.titre }}</strong><br>
+                        <small>{{ vienote.description }}</small><br>
+                        <small class="text-muted">Par: {{ vienote.createur.prenom }}</small>
+                    </li>
+                {% else %}
+                    <li class="list-group-item">Aucune modification trouvée</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bouton pour ajouter dynamiquement des éléments -->
+    <div class="mt-4">
+        <button onclick="ajouterElementListe()" class="btn btn-secondary">
+            📝 Ajouter élément à la liste
+        </button>
+        <button onclick="supprimerDernierElement()" class="btn btn-danger">
+            🗑️ Supprimer dernier élément
+        </button>
+    </div>
+</div>
+
+<script>
+// Action JavaScript pour ajouter une modification rapide
+function ajouterModificationRapide() {
+    let description = prompt("Description de la modification rapide :", "");
+    
+    if (description != null && description != "") {
+        // Simulation d'ajout (vous pouvez faire un fetch vers le serveur)
+        document.getElementById('resultat_js').innerHTML = 
+            '<div class="alert alert-success">Modification ajoutée: ' + description + '</div>';
+        
+        // Disparition automatique après 3 secondes
+        setTimeout(function() {
+            document.getElementById('resultat_js').innerHTML = '';
+        }, 3000);
+    }
+}
+
+// Fonction pour surligner les éléments au survol (comme dans le TP1 exercice 2-2)
+function highlightItem(element) {
+    element.style.backgroundColor = '#e3f2fd';
+    element.style.fontSize = '16px';
+    element.style.fontWeight = 'bold';
+    element.style.transition = 'all 0.3s ease';
+}
+
+function resetItem(element) {
+    element.style.backgroundColor = '';
+    element.style.fontSize = '';
+    element.style.fontWeight = '';
+}
+
+// Fonction pour ajouter un élément à la liste (comme dans le TP1 exercice 2-3)
+function ajouterElementListe() {
+    let nouvelleListe = document.getElementById('liste_recentes');
+    let nouvelElement = document.createElement('li');
+    nouvelElement.className = 'list-group-item vienote-item';
+    nouvelElement.innerHTML = '<strong>Nouvelle modification</strong><br><small>Ajoutée via JavaScript</small>';
+    
+    // Ajouter les événements de survol
+    nouvelElement.onmouseover = function() { highlightItem(this); };
+    nouvelElement.onmouseout = function() { resetItem(this); };
+    
+    nouvelleListe.appendChild(nouvelElement);
+}
+
+// Fonction pour supprimer le dernier élément
+function supprimerDernierElement() {
+    let liste = document.getElementById('liste_recentes');
+    let elements = liste.getElementsByClassName('vienote-item');
+    
+    if (elements.length > 0) {
+        liste.removeChild(elements[elements.length - 1]);
+    } else {
+        alert('Aucun élément à supprimer !');
+    }
+}
+</script>
+{% endblock %}

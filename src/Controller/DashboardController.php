@@ -14,6 +14,7 @@ use App\Entity\Note;
 use App\Entity\Etat;
 use App\Entity\Tag;
 use Doctrine\Common\Collections\Criteria;
+use App\Entity\VieNote;
 
 
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -94,5 +95,48 @@ final class DashboardController extends AbstractController
         return new Response(
             '<html><body>Formulaire soumis avec succès! Vous avez entré : ' . htmlspecialchars($exempleInput) . '</body></html>'
         );
+    }
+    #[IsGranted('ROLE_USER')]
+    #[Route('/dashboardVieNote', name: 'app_dashboard_vienote')]
+    public function dashboardVieNote(EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+
+    // Critère 1 : VieNote récentes (dernières 24h)
+        $vieNotesRecentes = $em->createQueryBuilder()
+            ->select('v')
+            ->from(VieNote::class, 'v')
+            ->where('v.updatedAt >= :date')
+            ->setParameter('date', new \DateTimeImmutable('-24 hours'))
+            ->orderBy('v.updatedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+    // Critère 2 : VieNote créées par l'utilisateur connecté
+        $mesVieNotes = $em->createQueryBuilder()
+            ->select('v')
+            ->from(VieNote::class, 'v')
+            ->where('v.createur = :user')
+            ->setParameter('user', $user)
+            ->orderBy('v.updatedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+    // Critère 3 : VieNote liées aux notes "En cours"
+        $vieNotesEnCours = $em->createQueryBuilder()
+            ->select('v')
+            ->from(VieNote::class, 'v')
+            ->join('v.note', 'n')
+            ->join('n.etat', 'e')
+            ->where('e.nom = :etat')
+            ->setParameter('etat', 'En cours')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('dashboard/vienote.html.twig', [
+            'vienotes_recentes' => $vieNotesRecentes,
+            'mes_vienotes' => $mesVieNotes,
+            'vienotes_en_cours' => $vieNotesEnCours,
+        ]);
     }
 }
